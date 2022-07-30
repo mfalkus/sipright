@@ -1,5 +1,3 @@
-/* parsip core */
-
 const SIPParser = require('./lib/Parser');
 const SDPParser = require('sdp-transform');
 const jwtDecode = require("jwt-decode")

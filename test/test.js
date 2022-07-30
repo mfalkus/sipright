@@ -1,8 +1,7 @@
-/* parsip core */
-
 var expect    = require("chai").expect;
-const parsip = require('../index');
+const sipright = require('../index');
 
+// Keep the useful base test case from parsip
 const testmessage = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
 Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
 From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
@@ -46,9 +45,9 @@ a=candidate:1 2 UDP 2113667326 2.3.4.5 55401 typ host\r\n\
 ';
 
 
-describe("ParSIP", function() {
+describe("SIPRight", function() {
  describe("SIP Parser", function() {
-    var decoded = parsip.getSIP(testmessage);
+    var decoded = sipright.getSIP(testmessage);
     it("From Header", function() {
       expect(decoded.from.uri._scheme).to.equal("sip");
       expect(decoded.from.uri._user).to.equal("250");
