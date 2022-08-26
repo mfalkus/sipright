@@ -15,9 +15,9 @@ var sip_message = "..." // Valid SIP Message here
 try {
     var sip = sipright.getSIP(sip_message);
     ... // Your packet is correct!
-} catch(e) {
+} catch(err) {
     // Your packet isn't correct
-    // Check out e to find out why
+    // Read string err to find out why
 }
 ```
 

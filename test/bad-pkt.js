@@ -21,6 +21,21 @@ Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
 \r\n\
 ';
 
+const missing_from = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+To: <sip:5000@sip.host.com>;user=phone\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+\r\n\
+';
+
+const missing_cseq = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+To: <sip:5000@sip.host.com>;user=phone\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+\r\n\
+';
+
 describe("ParSIP", function() {
  describe("SIP Parser", function() {
 
@@ -31,10 +46,24 @@ describe("ParSIP", function() {
         );
     });
 
-    it('cannot parse message without any CRLF', function(){
+    it('cannot parse message with bad URI', function(){
         assert.throws(
           () => sipright.getSIP(bad_uri_nocrlf_message),
           'error parsing header "To"'
+        );
+    });
+
+    it('cannot parse message without From header', function(){
+        assert.throws(
+          () => sipright.getSIP(missing_from),
+          'error no "From" header supplied'
+        );
+    });
+
+    it('cannot parse message without cseq header', function(){
+        assert.throws(
+          () => sipright.getSIP(missing_cseq),
+          'error no "Cseq" header supplied'
         );
     });
 
