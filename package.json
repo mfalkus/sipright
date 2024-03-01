@@ -1,6 +1,6 @@
 {
   "name": "sipright",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A SIP/SDP parsing module that checks for packet correctness",
   "main": "index.js",
   "scripts": {
