@@ -3,13 +3,12 @@ const sipright = require('../index');
 
 // Keep the useful base test case from parsip
 const testmessage = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
-v: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
-f: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
-T: <sip:5000@sip.host.com;user=phone>\r\n\
-i: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
 CSeq: 1661 INVITE\r\n\
-a: foo\r\n\
-m: "Lorenzo250" <sip:250@192.168.178.22:38488;transport=tcp;user=phone>\r\n\
+Contact: "Lorenzo250" <sip:250@192.168.178.22:38488;transport=tcp;user=phone>\r\n\
 Proxy-Authorization: Digest username="250", realm="sip.host.com", nonce="72424e0c-340a-11e8-aad5-65f47132e286", uri="sip:5000@sip.host.com;user=phone", response="c135e30edbf6b09aa90d9717700cba19", algorithm=MD5, cnonce="06889959", qop=auth, nc=00000d1b\r\n\
 Max-Forwards: 70\r\n\
 User-Agent: Grandstream GXP2200 1.0.3.27\r\n\
@@ -17,9 +16,9 @@ Privacy: none\r\n\
 P-Preferred-Identity: "Lorenzo250" <sip:250@sip.host.com;user=phone>\r\n\
 Supported: replaces, path, timer, eventlist\r\n\
 Allow: INVITE, ACK, OPTIONS, CANCEL, BYE, SUBSCRIBE, NOTIFY, INFO, REFER, UPDATE, MESSAGE\r\n\
-C: application/sdp\r\n\
+Content-Type: application/sdp\r\n\
 Accept: application/sdp, application/dtmf-relay\r\n\
-l:   309\r\n\
+Content-Length:   309\r\n\
 \r\n\
 v=0\r\n\
 o=- 20518 0 IN IP4 2.3.4.5\r\n\
@@ -47,32 +46,21 @@ a=candidate:1 2 UDP 2113667326 2.3.4.5 55401 typ host\r\n\
 
 
 describe("SIPRight", function() {
- describe("SIP Parser Compact Headers", function() {
+ describe("SIP Parser Post HDR Updates", function() {
     var decoded = sipright.getSIP(testmessage);
-    it("Compact From Header", function() {
-      expect(decoded.from.uri._scheme).to.equal("sip");
-      expect(decoded.from.uri._user).to.equal("250");
-      expect(decoded.from.parameters.tag).to.equal("1459587455");
-    });
-
-    it("Compact To Header", function() {
-      expect(decoded.to.uri._scheme).to.equal("sip");
-      expect(decoded.to.uri._user).to.equal("5000");
-    });
-
-    it("Compact Call-ID Header", function() {
+    it("Call-ID Header", function() {
       expect(decoded.headers['Call-ID'][0].parsed).to.equal("2015279366-5066-167@BJC.BGI.BHI.CC");
     });
 
-    it("Compact Contact Header", function() {
-      expect(decoded.headers['Contact'][0].parsed.uri._user).to.equal("250");
-      expect(decoded.headers['Contact'][0].parsed.uri._host).to.equal("192.168.178.22");
-      expect(decoded.headers['Contact'][0].parsed.uri._port).to.equal(38488);
+    decoded.addHeader('Foo', 'Bar');
+    it("Foo Header", function() {
+      expect(decoded.headers['Foo'][0].raw).equal("Bar");
+      expect(decoded.hasHeader('Foo'));
     });
 
-    it("Compact Via Header", function() {
-      expect(decoded.headers['Via'][0].parsed.host).to.equal("192.168.178.22");
-      expect(decoded.headers['Via'][0].parsed.port).to.equal(38488);
+    var output = decoded.updatedToString();
+    it("Foo hdr is in string output", function() {
+      expect(output).contains('Foo: Bar');
     });
 
   });

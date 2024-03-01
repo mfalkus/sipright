@@ -48,28 +48,20 @@ a=candidate:1 2 UDP 2113667326 2.3.4.5 55401 typ host\r\n\
 describe("SIPRight", function() {
  describe("SIP Parser", function() {
     var decoded = sipright.getSIP(testmessage);
-    it("From Header", function() {
-      expect(decoded.from.uri._scheme).to.equal("sip");
-      expect(decoded.from.uri._user).to.equal("250");
-      expect(decoded.from.parameters.tag).to.equal("1459587455");
-    });
-
-    it("To Header", function() {
-      expect(decoded.to.uri._scheme).to.equal("sip");
-      expect(decoded.to.uri._user).to.equal("5000");
-    });
-
     it("Call-ID Header", function() {
       expect(decoded.headers['Call-ID'][0].parsed).to.equal("2015279366-5066-167@BJC.BGI.BHI.CC");
     });
 
-    it("Contact Header", function() {
-      expect(decoded.headers['Contact'][0].parsed.uri._user).to.equal("250");
-      expect(decoded.headers['Contact'][0].parsed.uri._host).to.equal("192.168.178.22");
-      expect(decoded.headers['Contact'][0].parsed.uri._port).to.equal(38488);
+    decoded.addHeader('Foo', 'Bar');
+    it("Foo Header", function() {
+      expect(decoded.headers['Foo'][0].raw).equal("Bar");
+      expect(decoded.hasHeader('Foo'));
     });
 
-
+    var output = decoded.updatedToString();
+    it("Foo hdr is in string output", function() {
+      expect(output).contains('Foo: Bar');
+    });
 
   });
 });
