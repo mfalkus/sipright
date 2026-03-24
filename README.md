@@ -6,6 +6,12 @@ A fork of the excellent parsip module by
 Lorenzo Mangani (http://qxip.net/)
 that tries to give useful exceptions for packets that aren't valid.
 
+## Live examples
+
+- [SIP Packet Analysis](https://voiptoolbox.net/utils/packet)
+- [SIP PCAP Viewer](https://voiptoolbox.net/sip-pcap-viewer)
+
+
 ## Usage
 #### SIP to JSON
 ```javascript
@@ -20,6 +26,13 @@ try {
     // Read string err to find out why
 }
 ```
+
+## Validation behavior
+
+`getSIP()` can now return non-fatal packet quality signals in `sip.validation_warnings`.
+
+- Severe packet integrity issues throw exceptions (for example invalid or oversized `Content-Length`).
+- Softer issues are preserved as warnings (for example duplicate singleton headers, non-canonical header capitalization, extra bytes beyond declared `Content-Length`).
 
 ### License
 Released under the MIT License
