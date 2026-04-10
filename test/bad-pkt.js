@@ -91,6 +91,64 @@ cseq: 1661 INVITE\r\n\
 \r\n\
 ';
 
+const invite_missing_contact = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const sdp_private_media_ip = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Type: application/sdp\r\n\
+Content-Length: 116\r\n\
+\r\n\
+v=0\r\n\
+o=- 1 1 IN IP4 192.168.1.10\r\n\
+s=-\r\n\
+t=0 0\r\n\
+c=IN IP4 192.168.1.10\r\n\
+m=audio 12345 RTP/AVP 0\r\n\
+a=rtpmap:0 PCMU/8000\r\n\
+';
+
+const sdp_dtmf_only = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Type: application/sdp\r\n\
+Content-Length: 121\r\n\
+\r\n\
+v=0\r\n\
+o=- 1 1 IN IP4 2.3.4.5\r\n\
+s=-\r\n\
+t=0 0\r\n\
+c=IN IP4 2.3.4.5\r\n\
+m=audio 40000 RTP/AVP 101\r\n\
+a=rtpmap:101 telephone-event/8000\r\n\
+';
+
+const declared_sdp_but_not_sdp = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Type: application/sdp\r\n\
+Content-Length: 13\r\n\
+\r\n\
+hello world\r\n\
+';
+
 describe("ParSIP", function() {
  describe("SIP Parser", function() {
 
@@ -161,6 +219,35 @@ describe("ParSIP", function() {
           warnings.some((warning) => warning.indexOf('non-canonical header capitalization "to"') !== -1) &&
           warnings.some((warning) => warning.indexOf('non-canonical header capitalization "call-id"') !== -1) &&
           warnings.some((warning) => warning.indexOf('non-canonical header capitalization "cseq"') !== -1)
+        );
+    });
+
+    it('parses but warns when INVITE request is missing Contact header', function(){
+        const parsed = sipright.getSIP(invite_missing_contact);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('missing Contact header on INVITE request') !== -1)
+        );
+    });
+
+    it('parses but warns when SDP uses private media IPs', function(){
+        const parsed = sipright.getSIP(sdp_private_media_ip);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('SDP connection address looks non-routable') !== -1)
+        );
+    });
+
+    it('parses but warns when SDP audio has only telephone-event payloads', function(){
+        const parsed = sipright.getSIP(sdp_dtmf_only);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('lists only DTMF/telephone-event payloads') !== -1)
+        );
+    });
+
+    it('parses but warns when Content-Type is application/sdp but body is not valid SDP', function(){
+        const parsed = sipright.getSIP(declared_sdp_but_not_sdp);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('SDP body did not parse cleanly') !== -1) ||
+          warnings.some((warning) => warning.indexOf('failed to parse SDP body') !== -1)
         );
     });
 

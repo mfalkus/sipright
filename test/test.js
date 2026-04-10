@@ -50,6 +50,7 @@ From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
 To: <sip:5000@sip.host.com;user=phone>\r\n\
 Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
 CSeq: 1661 INVITE\r\n\
+Contact: "Lorenzo250" <sip:250@192.168.178.22:38488;transport=tcp;user=phone>\r\n\
 Content-Length: 0\r\n\
 \r\n\
 ';
