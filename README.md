@@ -2,10 +2,6 @@
 
 A SIP/SDP parsing module that checks for packet correctness.
 
-A fork of the excellent parsip module by 
-Lorenzo Mangani (http://qxip.net/)
-that tries to give useful exceptions for packets that aren't valid.
-
 ## Live examples
 
 - [SIP Packet Analysis](https://voiptoolbox.net/utils/packet)
@@ -34,10 +30,22 @@ try {
 - Severe packet integrity issues throw exceptions (for example invalid or oversized `Content-Length`).
 - Softer issues are preserved as warnings (for example duplicate singleton headers, non-canonical header capitalization, extra bytes beyond declared `Content-Length`).
 
+In addition to the legacy `validation_warnings` array, `getSIP()` also returns grouped warning views:
+
+- **`sip.validation_warnings_by_category`**: map of category name to warning strings
+- **`sip.validation_warnings_detailed`**: array of `{ category, warning }` objects
+
+Current categories include:
+
+- **`integrity`**: framing/body length anomalies
+- **`sip`**: SIP header quality and RFC3261-style packet issues
+- **`sdp`**: SDP/media heuristics (codec/IP/port issues, SDP parse problems)
+
 ### License
 Released under the MIT License
 
 ### Acknowledgement
-Based on parsip module by Lorenzo Mangani (http://qxip.net/),
+
+Originally based on parsip module by Lorenzo Mangani (http://qxip.net/),
 which is in turn based on elements from
 [jsSIP](https://github.com/versatica/JsSIP) and `SDP-Tranform` packages
