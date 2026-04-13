@@ -5,7 +5,7 @@ const jwtDecode = require("jwt-decode")
 
 
 const Functions = {
-	getSIP: SIPParser.parseMessage,
+	getSIP: (sip_message, options) => SIPParser.parseMessage(sip_message, undefined, options),
 	authSIP: authSIP.authorize,
 	getSDP: SDPParser.parse,
 	getVQ: SIPParser.parseVQ,

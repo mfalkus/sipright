@@ -101,6 +101,105 @@ Content-Length: 0\r\n\
 \r\n\
 ';
 
+const missing_via = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Max-Forwards: 70\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const missing_max_forwards = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const cseq_method_mismatch = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+Max-Forwards: 70\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 BYE\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const cseq_too_large = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+Max-Forwards: 70\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 2147483648 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const missing_from_tag = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+Max-Forwards: 70\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const body_without_content_type = 'MESSAGE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+Max-Forwards: 70\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 MESSAGE\r\n\
+Content-Length: 5\r\n\
+\r\n\
+hello';
+
+const duplicate_content_length = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+Max-Forwards: 70\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Length: 0\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const low_risk_initial_invite_with_to_tag = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+Max-Forwards: 70\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>;tag=abc123\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const low_risk_cancel_with_require = 'CANCEL sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+Max-Forwards: 70\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 CANCEL\r\n\
+Require: 100rel\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
 const sdp_private_media_ip = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
 Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
 From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
@@ -226,6 +325,76 @@ describe("ParSIP", function() {
         const parsed = sipright.getSIP(invite_missing_contact);
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
           warnings.some((warning) => warning.indexOf('missing Contact header on INVITE request') !== -1)
+        );
+    });
+
+    it('parses but warns when request is missing Via header', function(){
+        const parsed = sipright.getSIP(missing_via);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('missing Via header on request') !== -1)
+        );
+    });
+
+    it('parses but warns when request is missing Max-Forwards header', function(){
+        const parsed = sipright.getSIP(missing_max_forwards);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('missing Max-Forwards header on request') !== -1)
+        );
+    });
+
+    it('parses but warns when CSeq method does not match request method', function(){
+        const parsed = sipright.getSIP(cseq_method_mismatch);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('CSeq method') !== -1 && warning.indexOf('does not match request method') !== -1)
+        );
+    });
+
+    it('parses but warns when CSeq value is out of RFC range', function(){
+        const parsed = sipright.getSIP(cseq_too_large);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('CSeq value out of range') !== -1)
+        );
+    });
+
+    it('parses but warns when request From header is missing a tag', function(){
+        const parsed = sipright.getSIP(missing_from_tag);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('missing From tag on request') !== -1)
+        );
+    });
+
+    it('parses but warns when message has body but no Content-Type header', function(){
+        const parsed = sipright.getSIP(body_without_content_type);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('message has body but no Content-Type') !== -1)
+        );
+    });
+
+    it('parses but warns on duplicate Content-Length header', function(){
+        const parsed = sipright.getSIP(duplicate_content_length);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('duplicate Content-Length header') !== -1)
+        );
+    });
+
+    it('does not warn about To tag on initial INVITE unless low_risk is enabled', function(){
+        const parsed = sipright.getSIP(low_risk_initial_invite_with_to_tag);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          !warnings.some((warning) => warning.indexOf('initial INVITE contains a To tag') !== -1)
+        );
+    });
+
+    it('warns about To tag on initial INVITE when low_risk is enabled', function(){
+        const parsed = sipright.getSIP(low_risk_initial_invite_with_to_tag, { low_risk: true });
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('initial INVITE contains a To tag') !== -1)
+        );
+    });
+
+    it('warns on CANCEL with Require/Proxy-Require when low_risk is enabled', function(){
+        const parsed = sipright.getSIP(low_risk_cancel_with_require, { low_risk: true });
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('CANCEL contains Require/Proxy-Require') !== -1)
         );
     });
 

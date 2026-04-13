@@ -30,6 +30,12 @@ try {
 - Severe packet integrity issues throw exceptions (for example invalid or oversized `Content-Length`).
 - Softer issues are preserved as warnings (for example duplicate singleton headers, non-canonical header capitalization, extra bytes beyond declared `Content-Length`).
 
+You can enable additional low-signal validations (which may be noisy depending on the SIP traffic) by passing an options object:
+
+```javascript
+var sip = sipright.getSIP(sip_message, { low_risk: true });
+```
+
 In addition to the legacy `validation_warnings` array, `getSIP()` also returns grouped warning views:
 
 - **`sip.validation_warnings_by_category`**: map of category name to warning strings
