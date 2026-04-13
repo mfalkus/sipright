@@ -286,10 +286,11 @@ describe("ParSIP", function() {
         );
     });
 
-    it('cannot parse message with oversized content-length', function(){
-        assert.throws(
-          () => sipright.getSIP(bad_content_length_too_large),
-          'Content-Length (999) exceeds available body bytes'
+    it('parses but warns when content-length exceeds available body bytes', function(){
+        const parsed = sipright.getSIP(bad_content_length_too_large);
+        expect(parsed.body).to.equal('v=0\r\n');
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('Content-Length (999) exceeds available body bytes') !== -1)
         );
     });
 
