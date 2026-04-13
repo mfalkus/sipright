@@ -236,6 +236,25 @@ m=audio 40000 RTP/AVP 101\r\n\
 a=rtpmap:101 telephone-event/8000\r\n\
 ';
 
+const sdp_pcmu_and_dtmf_without_rtpmap_for_0 = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-168@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Type: application/sdp\r\n\
+Content-Length: 168\r\n\
+\r\n\
+v=0\r\n\
+o=- 1 1 IN IP4 2.3.4.5\r\n\
+s=-\r\n\
+t=0 0\r\n\
+c=IN IP4 2.3.4.5\r\n\
+m=audio 40000 RTP/AVP 0 101\r\n\
+a=rtpmap:101 telephone-event/8000\r\n\
+a=fmtp:101 0-16\r\n\
+';
+
 const declared_sdp_but_not_sdp = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
 Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
 From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
@@ -246,6 +265,18 @@ Content-Type: application/sdp\r\n\
 Content-Length: 13\r\n\
 \r\n\
 hello world\r\n\
+';
+
+const non_canonical_x_header_capitalization = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-169@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+x-cid: 123\r\n\
+X-CMS-No-Ice: 1\r\n\
+Content-Length: 0\r\n\
+\r\n\
 ';
 
 describe("ParSIP", function() {
@@ -319,6 +350,14 @@ describe("ParSIP", function() {
           warnings.some((warning) => warning.indexOf('non-canonical header capitalization "to"') !== -1) &&
           warnings.some((warning) => warning.indexOf('non-canonical header capitalization "call-id"') !== -1) &&
           warnings.some((warning) => warning.indexOf('non-canonical header capitalization "cseq"') !== -1)
+        );
+    });
+
+    it('warns only when X- header starts with lowercase x-', function(){
+        const parsed = sipright.getSIP(non_canonical_x_header_capitalization);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('X- extension header should start with "X-"') !== -1) &&
+          !warnings.some((warning) => warning.indexOf('non-canonical header capitalization "X-CMS-No-Ice"') !== -1)
         );
     });
 
@@ -410,6 +449,13 @@ describe("ParSIP", function() {
         const parsed = sipright.getSIP(sdp_dtmf_only);
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
           warnings.some((warning) => warning.indexOf('lists only DTMF/telephone-event payloads') !== -1)
+        );
+    });
+
+    it('does not warn when SDP audio offers PCMU (static PT 0) plus telephone-event', function(){
+        const parsed = sipright.getSIP(sdp_pcmu_and_dtmf_without_rtpmap_for_0);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          !warnings.some((warning) => warning.indexOf('lists only DTMF/telephone-event payloads') !== -1)
         );
     });
 
