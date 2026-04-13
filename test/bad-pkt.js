@@ -279,6 +279,53 @@ Content-Length: 0\r\n\
 \r\n\
 ';
 
+const record_route_private_ip_mixed_context = 'SIP/2.0 183 Session Progress\r\n\
+Via: SIP/2.0/UDP 198.51.100.10:5060;branch=z9hG4bKabc123\r\n\
+From: <sip:alice@example.com>;tag=aa11\r\n\
+To: <sip:bob@example.net>;tag=bb22\r\n\
+Call-ID: rr-mixed-001\r\n\
+CSeq: 1 INVITE\r\n\
+Record-Route: <sip:198.51.100.20:5060;lr>\r\n\
+Record-Route: <sip:10.23.45.67:5060;lr>\r\n\
+Contact: <sip:203.0.113.9:5060>\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const record_route_private_ip_internal_only = 'SIP/2.0 183 Session Progress\r\n\
+Via: SIP/2.0/UDP 10.23.45.66:5060;branch=z9hG4bKdef456\r\n\
+From: <sip:alice@10.0.0.5>;tag=aa11\r\n\
+To: <sip:bob@10.0.0.6>;tag=bb22\r\n\
+Call-ID: rr-internal-001\r\n\
+CSeq: 1 INVITE\r\n\
+Record-Route: <sip:10.23.45.67:5060;lr>\r\n\
+Contact: <sip:10.23.45.68:5060>\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const from_to_contact_private_ip_mixed_context = 'SIP/2.0 183 Session Progress\r\n\
+Via: SIP/2.0/UDP 203.0.113.10:5060;branch=z9hG4bKvia001\r\n\
+From: <sip:alice@10.0.0.10:5060>;tag=ft01\r\n\
+To: <sip:bob@10.0.0.11:5060>;tag=ft02\r\n\
+Call-ID: ft-mixed-001\r\n\
+CSeq: 1 INVITE\r\n\
+Contact: <sip:10.0.0.12:5060>\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
+const from_to_contact_private_ip_internal_only = 'SIP/2.0 183 Session Progress\r\n\
+Via: SIP/2.0/UDP 10.0.0.1:5060;branch=z9hG4bKvia002\r\n\
+From: <sip:alice@10.0.0.10:5060>;tag=ft01\r\n\
+To: <sip:bob@10.0.0.11:5060>;tag=ft02\r\n\
+Call-ID: ft-internal-001\r\n\
+CSeq: 1 INVITE\r\n\
+Contact: <sip:10.0.0.12:5060>\r\n\
+Content-Length: 0\r\n\
+\r\n\
+';
+
 describe("ParSIP", function() {
  describe("SIP Parser", function() {
 
@@ -358,6 +405,38 @@ describe("ParSIP", function() {
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
           warnings.some((warning) => warning.indexOf('X- extension header should start with "X-"') !== -1) &&
           !warnings.some((warning) => warning.indexOf('non-canonical header capitalization "X-CMS-No-Ice"') !== -1)
+        );
+    });
+
+    it('warns when Record-Route contains private IP with mixed public/private context', function(){
+        const parsed = sipright.getSIP(record_route_private_ip_mixed_context);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('Record-Route contains non-routable address (10.23.45.67)') !== -1)
+        );
+    });
+
+    it('does not warn on private Record-Route when message context is internal-only', function(){
+        const parsed = sipright.getSIP(record_route_private_ip_internal_only);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          !warnings.some((warning) => warning.indexOf('Record-Route contains non-routable address') !== -1)
+        );
+    });
+
+    it('warns on private From/To/Contact URI hosts when message has public context', function(){
+        const parsed = sipright.getSIP(from_to_contact_private_ip_mixed_context);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('From header contains non-routable URI host (10.0.0.10)') !== -1) &&
+          warnings.some((warning) => warning.indexOf('To header contains non-routable URI host (10.0.0.11)') !== -1) &&
+          warnings.some((warning) => warning.indexOf('Contact header contains non-routable URI host (10.0.0.12)') !== -1)
+        );
+    });
+
+    it('does not warn on private From/To/Contact URI hosts when message context is internal-only', function(){
+        const parsed = sipright.getSIP(from_to_contact_private_ip_internal_only);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          !warnings.some((warning) => warning.indexOf('From header contains non-routable URI host') !== -1) &&
+          !warnings.some((warning) => warning.indexOf('To header contains non-routable URI host') !== -1) &&
+          !warnings.some((warning) => warning.indexOf('Contact header contains non-routable URI host') !== -1)
         );
     });
 
