@@ -10,8 +10,26 @@ Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\n\
 From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\n\
 To: <sip:5000@sip.host.com;user=phone>\n\
 Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\n\
+CSeq: 1661 INVITE\n\
+Content-Length: 0\n\
 \n\
 ';
+
+const lf_only_missing_trailing_newline_and_header_terminator =
+'INVITE sip:558000380541@204.10.205.154:5060 SIP/2.0\n\
+Record-Route: <sip:186.224.210.209;r2=on;lr=on>\n\
+Record-Route: <sip:10.90.11.253;r2=on;lr=on>\n\
+Via: SIP/2.0/UDP 186.224.210.209;branch=z9hG4bK3cb2.323e3e83.0\n\
+Via: SIP/2.0/UDP 10.90.11.252:5060;branch=z9hG4bK-524287-1---be4c4811c4d77678;rport=5060\n\
+Max-Forwards: 16\n\
+Contact: <sip:11999947220@10.90.11.252:5060>\n\
+To: <sip:558000380541@204.10.205.154:5060>\n\
+From: <sip:11999947220@10.90.11.252:5060>;tag=bfa87f29\n\
+Call-ID: 55OU-cc4iU-seb3CmESQrA..\n\
+CSeq: 1 INVITE\n\
+Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, UPDATE, INFO\n\
+Content-Type: application/sdp\n\
+Content-Length: 0';
 
 const bad_uri_nocrlf_message = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
 Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
@@ -359,10 +377,10 @@ Content-Length: 0\r\n\
 describe("ParSIP", function() {
  describe("SIP Parser", function() {
 
-    it('cannot parse message without any CRLF', function(){
-        assert.throws(
-          () => sipright.getSIP(nocrlf_message),
-          'parseMessage() | no CRLF found, not a SIP message'
+    it('parses but warns when message uses LF line endings (no CRLF)', function(){
+        const parsed = sipright.getSIP(nocrlf_message);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('message uses LF line endings') !== -1)
         );
     });
 
@@ -596,6 +614,16 @@ describe("ParSIP", function() {
         expect(parsed.body).to.equal('v=0');
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
           warnings.some((warning) => warning.indexOf('SDP body is missing final newline') !== -1)
+        );
+    });
+
+    it('parses but warns when LF-only copy/paste loses trailing newline and header terminator', function(){
+        const parsed = sipright.getSIP(lf_only_missing_trailing_newline_and_header_terminator);
+        expect(parsed.body).to.equal('');
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('message uses LF line endings') !== -1) &&
+          warnings.some((warning) => warning.indexOf('missing trailing newline') !== -1) &&
+          warnings.some((warning) => warning.indexOf('missing header terminator') !== -1)
         );
     });
 
