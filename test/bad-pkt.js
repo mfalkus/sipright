@@ -286,6 +286,17 @@ Content-Length: 13\r\n\
 hello world\r\n\
 ';
 
+const declared_sdp_missing_final_newline = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-167@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Type: application/sdp\r\n\
+Content-Length: 4\r\n\
+\r\n\
+v=0';
+
 const non_canonical_x_header_capitalization = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
 Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
 From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
@@ -388,6 +399,10 @@ describe("ParSIP", function() {
         expect(parsed.body).to.equal('v=0\r\n');
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
           warnings.some((warning) => warning.indexOf('Content-Length (999) exceeds available body bytes') !== -1)
+        );
+        // Should continue with other non-fatal warnings too (no early-return on integrity warnings).
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('missing Contact header on INVITE request') !== -1)
         );
     });
 
@@ -573,6 +588,14 @@ describe("ParSIP", function() {
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
           warnings.some((warning) => warning.indexOf('SDP body did not parse cleanly') !== -1) ||
           warnings.some((warning) => warning.indexOf('failed to parse SDP body') !== -1)
+        );
+    });
+
+    it('parses but warns when SDP body is missing final newline', function(){
+        const parsed = sipright.getSIP(declared_sdp_missing_final_newline);
+        expect(parsed.body).to.equal('v=0');
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          warnings.some((warning) => warning.indexOf('SDP body is missing final newline') !== -1)
         );
     });
 
