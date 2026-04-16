@@ -411,19 +411,19 @@ describe("ParSIP", function() {
 
     it('parses but warns on non-canonical header capitalization', function(){
         const parsed = sipright.getSIP(non_canonical_header_case);
-        expect(parsed.validation_warnings).to.satisfy((warnings) =>
-          warnings.some((warning) => warning.indexOf('non-canonical header capitalization "from"') !== -1) &&
-          warnings.some((warning) => warning.indexOf('non-canonical header capitalization "to"') !== -1) &&
-          warnings.some((warning) => warning.indexOf('non-canonical header capitalization "call-id"') !== -1) &&
-          warnings.some((warning) => warning.indexOf('non-canonical header capitalization "cseq"') !== -1)
+        expect(parsed.validation_infos).to.satisfy((infos) =>
+          infos.some((info) => info.indexOf('non-canonical header capitalization "from"') !== -1) &&
+          infos.some((info) => info.indexOf('non-canonical header capitalization "to"') !== -1) &&
+          infos.some((info) => info.indexOf('non-canonical header capitalization "call-id"') !== -1) &&
+          infos.some((info) => info.indexOf('non-canonical header capitalization "cseq"') !== -1)
         );
     });
 
     it('warns only when X- header starts with lowercase x-', function(){
         const parsed = sipright.getSIP(non_canonical_x_header_capitalization);
-        expect(parsed.validation_warnings).to.satisfy((warnings) =>
-          warnings.some((warning) => warning.indexOf('X- extension header should start with "X-"') !== -1) &&
-          !warnings.some((warning) => warning.indexOf('non-canonical header capitalization "X-CMS-No-Ice"') !== -1)
+        expect(parsed.validation_infos).to.satisfy((infos) =>
+          infos.some((info) => info.indexOf('X- extension header should start with "X-"') !== -1) &&
+          !infos.some((info) => info.indexOf('non-canonical header capitalization "X-CMS-No-Ice"') !== -1)
         );
     });
 
@@ -447,8 +447,8 @@ describe("ParSIP", function() {
           warnings.some((warning) => warning.indexOf('Contact header contains non-routable URI host (10.0.0.12)') !== -1)
         );
         expect(parsed.validation_infos).to.satisfy((infos) =>
-          infos.some((info) => info.indexOf('From header contains non-routable URI host (10.0.0.10)') !== -1) &&
-          infos.some((info) => info.indexOf('To header contains non-routable URI host (10.0.0.11)') !== -1)
+          infos.some((info) => info.indexOf('From header contains non-routable URI host (10.0.0.10)') !== -1 && info.indexOf('may reveal private routing/topology information') !== -1) &&
+          infos.some((info) => info.indexOf('To header contains non-routable URI host (10.0.0.11)') !== -1 && info.indexOf('may reveal private routing/topology information') !== -1)
         );
     });
 
