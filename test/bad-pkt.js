@@ -255,6 +255,25 @@ a=rtpmap:101 telephone-event/8000\r\n\
 a=fmtp:101 0-16\r\n\
 ';
 
+const sdp_static_payloads_pcma_pcmu_g729_and_dtmf_without_rtpmap = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
+Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
+From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
+To: <sip:5000@sip.host.com;user=phone>\r\n\
+Call-ID: 2015279366-5066-170@BJC.BGI.BHI.CC\r\n\
+CSeq: 1661 INVITE\r\n\
+Content-Type: application/sdp\r\n\
+Content-Length: 197\r\n\
+\r\n\
+v=0\r\n\
+o=- 1 1 IN IP4 2.3.4.5\r\n\
+s=-\r\n\
+t=0 0\r\n\
+c=IN IP4 2.3.4.5\r\n\
+m=audio 40000 RTP/AVP 8 0 18 101\r\n\
+a=rtpmap:101 telephone-event/8000\r\n\
+a=fmtp:101 0-15\r\n\
+';
+
 const declared_sdp_but_not_sdp = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
 Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
 From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
@@ -425,18 +444,22 @@ describe("ParSIP", function() {
     it('warns on private From/To/Contact URI hosts when message has public context', function(){
         const parsed = sipright.getSIP(from_to_contact_private_ip_mixed_context);
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
-          warnings.some((warning) => warning.indexOf('From header contains non-routable URI host (10.0.0.10)') !== -1) &&
-          warnings.some((warning) => warning.indexOf('To header contains non-routable URI host (10.0.0.11)') !== -1) &&
           warnings.some((warning) => warning.indexOf('Contact header contains non-routable URI host (10.0.0.12)') !== -1)
+        );
+        expect(parsed.validation_infos).to.satisfy((infos) =>
+          infos.some((info) => info.indexOf('From header contains non-routable URI host (10.0.0.10)') !== -1) &&
+          infos.some((info) => info.indexOf('To header contains non-routable URI host (10.0.0.11)') !== -1)
         );
     });
 
     it('does not warn on private From/To/Contact URI hosts when message context is internal-only', function(){
         const parsed = sipright.getSIP(from_to_contact_private_ip_internal_only);
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
-          !warnings.some((warning) => warning.indexOf('From header contains non-routable URI host') !== -1) &&
-          !warnings.some((warning) => warning.indexOf('To header contains non-routable URI host') !== -1) &&
           !warnings.some((warning) => warning.indexOf('Contact header contains non-routable URI host') !== -1)
+        );
+        expect(parsed.validation_infos).to.satisfy((infos) =>
+          !infos.some((info) => info.indexOf('From header contains non-routable URI host') !== -1) &&
+          !infos.some((info) => info.indexOf('To header contains non-routable URI host') !== -1)
         );
     });
 
@@ -533,6 +556,13 @@ describe("ParSIP", function() {
 
     it('does not warn when SDP audio offers PCMU (static PT 0) plus telephone-event', function(){
         const parsed = sipright.getSIP(sdp_pcmu_and_dtmf_without_rtpmap_for_0);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          !warnings.some((warning) => warning.indexOf('lists only DTMF/telephone-event payloads') !== -1)
+        );
+    });
+
+    it('does not warn when SDP audio offers static PT codecs (8/0/18) plus telephone-event but no rtpmap for static PTs', function(){
+        const parsed = sipright.getSIP(sdp_static_payloads_pcma_pcmu_g729_and_dtmf_without_rtpmap);
         expect(parsed.validation_warnings).to.satisfy((warnings) =>
           !warnings.some((warning) => warning.indexOf('lists only DTMF/telephone-event payloads') !== -1)
         );
