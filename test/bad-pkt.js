@@ -31,6 +31,29 @@ Allow: INVITE, ACK, CANCEL, OPTIONS, BYE, UPDATE, INFO\n\
 Content-Type: application/sdp\n\
 Content-Length: 0';
 
+const lf_only_sdp_with_payloads_should_not_warn_missing_payloads =
+'INVITE sip:bob@biloxi.com SIP/2.0\n\
+Via: SIP/2.0/UDP pc33.atlanta.com;branch=z9hG4bKnashds8\n\
+Max-Forwards: 70\n\
+To: Bob <sip:bob@biloxi.com>\n\
+From: Alice <sip:alice@atlanta.com>;tag=1928301774\n\
+Call-ID: a84b4c76e66710\n\
+CSeq: 314159 INVITE\n\
+Contact: <sip:alice@pc33.atlanta.com>\n\
+Content-Type: application/sdp\n\
+Content-Length: 131\n\
+\n\
+v=0\n\
+o=- 20500 0 IN IP4 2.3.4.5\n\
+s=\n\
+t=0 0\n\
+c=IN IP4 2.3.4.5\n\
+m=audio 50000 RTP/AVP 0\n\
+a=rtpmap:0 PCMU/8000\n\
+a=ptime:20\n\
+a=sendrecv\n\
+';
+
 const bad_uri_nocrlf_message = 'INVITE sip:5000@sip.host.com;user=phone SIP/2.0\r\n\
 Via: SIP/2.0/TCP 192.168.178.22:38488;branch=z9hG4bK1428069545;rport;alias\r\n\
 From: "Lorenzo250" <sip:250@sip.host.com;user=phone>;tag=1459587455\r\n\
@@ -624,6 +647,13 @@ describe("ParSIP", function() {
           warnings.some((warning) => warning.indexOf('message uses LF line endings') !== -1) &&
           warnings.some((warning) => warning.indexOf('missing trailing newline') !== -1) &&
           warnings.some((warning) => warning.indexOf('missing header terminator') !== -1)
+        );
+    });
+
+    it('does not warn about missing SDP payload types when LF-only copy/paste has correct m-line payloads', function(){
+        const parsed = sipright.getSIP(lf_only_sdp_with_payloads_should_not_warn_missing_payloads);
+        expect(parsed.validation_warnings).to.satisfy((warnings) =>
+          !warnings.some((warning) => warning.indexOf('SDP audio m-line has no payload types listed') !== -1)
         );
     });
 
